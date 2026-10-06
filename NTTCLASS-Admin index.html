@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTTCLASS - Quản lý trung tâm</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { margin: 0; min-height: 100vh; background: #f5f7fa; color: #202124; }
+        button, input, select, textarea { font: inherit; }
+        button { cursor: pointer; }
+        [hidden] { display: none !important; }
+        .login-page { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+        .login-card, .panel, .stat-card { background: #fff; border: 1px solid #e1e4e8; border-radius: 10px; }
+        .login-card { width: min(440px, 100%); padding: 26px; }
+        .login-card h1 { color: #1a73e8; font-size: 22px; margin: 0 0 8px; }
+        .login-card > p { color: #5f6368; line-height: 1.5; }
+        .notice { min-height: 20px; color: #b3261e; margin: 8px 0 16px; line-height: 1.4; }
+        .notice.ok { color: #137333; }
+        .app { min-height: 100vh; display: flex; }
+        .sidebar { width: 250px; flex: 0 0 250px; padding: 20px 14px; background: #fff; border-right: 1px solid #e1e4e8; }
+        .logo { color: #1a73e8; font-weight: 700; font-size: 20px; margin: 0 8px 20px; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #e8f0fe; padding: 10px; border-radius: 8px; margin-bottom: 16px; }
+        .avatar { width: 40px; height: 40px; flex: 0 0 40px; background: #1a73e8; color: white; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+        .user-profile span, .user-profile small { display: block; }
+        .user-profile span { font-weight: 600; font-size: 14px; }
+        .user-profile small { color: #5f6368; font-size: 12px; }
+        .nav-button { display: block; width: 100%; border: 0; text-align: left; color: #3c4043; background: transparent; padding: 11px 12px; border-radius: 6px; margin: 3px 0; }
+        .nav-button:hover, .nav-button.active { color: #1a73e8; background: #e8f0fe; }
+        .logout { width: 100%; margin-top: 16px; }
+        .main { flex: 1; min-width: 0; padding: 26px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
+        .page-header h1 { margin: 0; font-size: 24px; }
+        .page-header p { margin: 5px 0 0; color: #5f6368; }
+        .btn { border: 0; border-radius: 6px; padding: 10px 15px; font-weight: 600; background: #1a73e8; color: white; }
+        .btn:hover { filter: brightness(.94); }
+        .btn.green { background: #188038; }
+        .btn.gray { background: #f1f3f4; color: #202124; }
+        .btn.red-text { background: transparent; color: #b3261e; padding: 6px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .stat-card { text-align: center; padding: 17px; }
+        .stat-card h2 { color: #5f6368; text-transform: uppercase; font-size: 12px; margin: 0 0 9px; }
+        .stat-card p { color: #1a73e8; font-size: 25px; font-weight: 700; margin: 0; overflow-wrap: anywhere; }
+        .panel { padding: 20px; margin-bottom: 18px; }
+        .panel h2 { margin: 0 0 15px; font-size: 18px; }
+        .panel h3 { margin: 18px 0 10px; font-size: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; }
+        .field { display: block; margin: 0 0 12px; font-weight: 600; font-size: 14px; }
+        .field input, .field select, .field textarea { display: block; width: 100%; margin-top: 6px; padding: 10px; border: 1px solid #c4c7c5; border-radius: 6px; background: white; color: #202124; }
+        .field textarea { min-height: 74px; resize: vertical; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { border-bottom: 1px solid #e1e4e8; padding: 11px 9px; }
+        th { color: #5f6368; font-size: 13px; }
+        .empty { padding: 22px 8px; color: #5f6368; text-align: center; }
+        .muted { color: #5f6368; font-size: 13px; line-height: 1.5; }
+        .pill { display: inline-block; border-radius: 999px; padding: 4px 9px; font-size: 12px; background: #e6f4ea; color: #137333; }
+        .pill.unpaid { background: #fce8e6; color: #b3261e; }
+        .check-row { display: flex; gap: 9px; align-items: center; margin: 9px 0; }
+        .check-row input { width: auto; }
+        dialog { width: min(450px, calc(100% - 28px)); max-height: 90vh; overflow-y: auto; border: 0; border-radius: 10px; padding: 24px; box-shadow: 0 8px 32px #0003; }
+        dialog::backdrop { background: #20212480; }
+        dialog h2 { margin: 0 0 16px; }
+        .dialog-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+        .roster-list { margin: 0; padding: 0; list-style: none; }
+        .roster-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e1e4e8; }
+        .roster-list li span { overflow-wrap: anywhere; }
+        .selected-student { display: inline-block; margin-right: 10px; font-weight: 500; }
+        @media (max-width: 950px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 680px) {
+            .app { display: block; }
+            .sidebar { width: 100%; padding: 12px; border: 0; border-bottom: 1px solid #e1e4e8; }
+            .logo { margin: 0 4px 10px; }
+            .user-profile { margin-bottom: 9px; }
+            .nav-list { display: flex; overflow-x: auto; gap: 4px; }
+            .nav-button { width: auto; flex: 0 0 auto; white-space: nowrap; }
+            .logout { width: auto; margin-top: 8px; }
+            .main { padding: 18px 12px; }
+            .page-header { align-items: flex-start; flex-direction: column; }
+            .page-header h1 { font-size: 21px; }
+            .form-grid { grid-template-columns: 1fr; gap: 0; }
+            .panel { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page" id="login-page" hidden>
+        <section class="login-card">
+            <h1>NTTCLASS ADMIN</h1>
+            <p id="login-description"></p>
+            <p class="notice" id="login-notice" role="status" aria-live="polite"></p>
+            <form id="login-form">
+                <label class="field" id="display-name-field" hidden>Họ tên
+                    <input name="displayName" maxlength="80" autocomplete="name">
+                </label>
+                <label class="field">Tên đăng nhập
+                    <input name="username" required maxlength="40" autocomplete="username">
+                </label>
+                <p class="muted">Tên tài khoản quản trị phải kết thúc bằng “admin”; giáo viên/giảng viên phải kết thúc bằng “giaovien”.</p>
+                <label class="field">Mật khẩu
+                    <input name="password" type="password" required minlength="8" autocomplete="current-password">
+                </label>
+                <button class="btn" id="login-submit" type="submit">Đăng nhập</button>
+            </form>
+            <p class="muted">Dữ liệu và tài khoản chỉ tồn tại trong bộ nhớ trình duyệt này. Đây là bản dùng thử, không dùng để bảo vệ dữ liệu thật.</p>
+        </section>
+    </div>
+
+    <div class="app" id="app" hidden>
+        <aside class="sidebar">
+            <div class="logo">NTTCLASS ADMIN</div>
+            <div class="user-profile">
+                <div class="avatar" id="avatar">AD</div>
+                <div><span id="current-user"></span><small id="current-role"></small></div>
+            </div>
+            <nav class="nav-list" id="nav-list" aria-label="Chức năng">
+                <button class="nav-button" data-view="classes">🏫 Quản lý Lớp học</button>
+                <button class="nav-button" data-view="staff">👥 Quản lý nhân sự</button>
+                <button class="nav-button" data-view="students">👨‍🎓 Học sinh</button>
+                <button class="nav-button" data-view="attendance">✅ Điểm danh</button>
+                <button class="nav-button" data-view="grades">📊 Tiến độ &amp; Điểm số</button>
+                <button class="nav-button" data-view="finance">💰 Tài chính (Học phí)</button>
+                <button class="nav-button" data-view="settings">⚙️ Cài đặt hệ thống</button>
+            </nav>
+            <button class="btn gray logout" id="logout-button">Đăng xuất</button>
+        </aside>
+
+        <main class="main">
+            <p class="notice" id="notice" role="status" aria-live="polite"></p>
+            <section class="view" id="view-classes">
+                <header class="page-header">
+                    <div><h1>Quản lý lớp học</h1><p>Theo dõi sĩ số, học phí và phân công nhân sự.</p></div>
+                    <button class="btn" id="open-class-form">+ Tạo lớp học</button>
+                </header>
+                <div class="stats-grid">
+                    <article class="stat-card"><h2>Tổng lớp</h2><p id="class-count">0</p></article>
+                    <article class="stat-card"><h2>Tổng học sinh</h2><p id="student-count">0</p></article>
+                    <article class="stat-card"><h2>Giáo viên &amp; trợ giảng</h2><p id="staff-count">0</p></article>
+                    <article class="stat-card"><h2>Học phí dự kiến / tháng</h2><p id="revenue">0 đ</p></article>
+                </div>
+                <div class="panel"><h2>Danh sách lớp</h2><div class="table-wrap"><table><thead><tr><th>Tên lớp</th><th>Sĩ số ghi nhận</th><th>Học phí / tháng</th><th>Thao tác</th></tr></thead><tbody id="class-list"></tbody></table></div><div class="empty" id="class-empty">Chưa có lớp học.</div></div>
+            </section>
+
+            <section class="view" id="view-students" hidden>
+                <header class="page-header"><div><h1>Học sinh</h1><p>Thêm, xem và quản lý hồ sơ học sinh.</p></div><button class="btn" id="open-student-form">+ Thêm học sinh</button></header>
+                <div class="panel"><div class="table-wrap"><table><thead><tr><th>Họ tên</th><th>Lớp</th><th>Số điện thoại</th><th>Thao tác</th></tr></thead><tbody id="student-list"></tbody></table></div><div class="empty" id="student-empty">Chưa có học sinh.</div></div>
+            </section>
+
+            <section class="view" id="view-staff" hidden>
+                <header class="page-header">
+                    <div><h1>Quản lý nhân sự</h1><p>Danh sách giáo viên và trợ giảng, bao gồm tình trạng tài khoản đăng nhập.</p></div>
+                    <button class="btn" id="add-staff-account">+ Thêm nhân sự</button>
+                </header>
+                <div class="panel">
+                    <div class="form-grid">
+                        <article class="stat-card"><h2>Giáo viên</h2><p id="teacher-count">0</p></article>
+                        <article class="stat-card"><h2>Trợ giảng</h2><p id="assistant-count">0</p></article>
+                    </div>
+                    <label class="field">Lọc danh sách
+                        <select id="staff-filter">
+                            <option value="all">Tất cả nhân sự</option>
+                            <option value="teacher">Giáo viên</option>
+                            <option value="assistant">Trợ giảng</option>
+                            <option value="unlinked">Chưa có tài khoản</option>
+                        </select>
+                    </label>
+                    <div class="table-wrap"><table><thead><tr><th>Họ tên</th><th>Tên đăng nhập</th><th>Vai trò</th><th>Tài khoản</th><th>Thao tác</th></tr></thead><tbody id="staff-directory"></tbody></table></div>
+                    <div class="empty" id="staff-directory-empty">Chưa có giáo viên hoặc trợ giảng. Chọn “Thêm nhân sự” để tạo tài khoản.</div>
+                </div>
+            </section>
+
+            <section class="view" id="view-attendance" hidden>
+                <header class="page-header"><div><h1>Điểm danh</h1><p>Chọn ngày và đánh dấu học sinh có mặt.</p></div></header>
+                <div class="panel">
+                    <div class="form-grid">
+                        <label class="field">Lớp học<select id="attendance-class"><option value="all">Tất cả lớp</option></select></label>
+                        <label class="field">Ngày điểm danh<input id="attendance-date" type="date"></label>
+                    </div>
+                    <button class="btn green" id="save-attendance">Lưu điểm danh</button>
+                    <div id="attendance-list"></div><div class="empty" id="attendance-empty">Thêm học sinh trước khi điểm danh.</div>
+                </div>
+                <div class="panel"><h2>Lịch sử điểm danh</h2><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Học sinh</th><th>Trạng thái</th></tr></thead><tbody id="attendance-history"></tbody></table></div><div class="empty" id="attendance-history-empty">Chưa có lịch sử điểm danh.</div></div>
+            </section>
+
+            <section class="view" id="view-grades" hidden>
+                <header class="page-header"><div><h1>Tiến độ &amp; điểm số</h1><p>Ghi nhận kết quả và nhận xét cho từng học sinh.</p></div></header>
+                <div class="panel">
+                    <form id="grade-form">
+                        <div class="form-grid">
+                            <div class="field">Học sinh
+                                <input type="hidden" name="studentId">
+                                <span id="grade-selected-student">Chưa chọn học sinh</span>
+                                <button class="btn gray" id="open-grade-student-picker" type="button">Chọn học sinh</button>
+                            </div>
+                            <label class="field">Môn học<input name="subject" required maxlength="60"></label>
+                            <label class="field">Bài đánh giá<input name="title" required maxlength="80" placeholder="Ví dụ: Kiểm tra giữa kỳ"></label>
+                            <label class="field">Điểm<input name="score" type="number" min="0" step="0.1" required></label>
+                            <label class="field">Điểm tối đa<input name="maxScore" type="number" min="0.1" step="0.1" value="10" required></label>
+                            <label class="field">Ngày đánh giá<input name="date" type="date" required></label>
+                        </div>
+                        <label class="field">Nhận xét<textarea name="comment" maxlength="500"></textarea></label>
+                        <button class="btn" type="submit">Lưu đánh giá</button>
+                    </form>
+                </div>
+                <div class="panel"><h2>Kết quả đánh giá</h2><div class="table-wrap"><table><thead><tr><th>Ngày</th><th>Học sinh</th><th>Môn / bài</th><th>Điểm</th><th>Nhận xét</th></tr></thead><tbody id="grade-list"></tbody></table></div><div class="empty" id="grade-empty">Chưa có đánh giá.</div></div>
+            </section>
+
+            <section class="view" id="view-finance" hidden>
+                <header class="page-header"><div><h1>Kiểm kê học phí</h1><p>Theo dõi từng học sinh đã đóng hay chưa theo tháng.</p></div></header>
+                <div class="panel">
+                    <p class="muted">Chỉ học sinh có hồ sơ cá nhân mới xuất hiện trong bảng này. Sĩ số cũ chỉ là số tổng hợp nên không thể xác định em nào đã đóng học phí.</p>
+                    <div class="form-grid"><label class="field">Tháng<input id="finance-month" type="month"></label><div><p class="muted">Đánh dấu đã đóng để ghi nhận học phí tháng đã chọn.</p></div></div>
+                    <div class="stats-grid"><article class="stat-card"><h2>Đã thu</h2><p id="paid-total">0 đ</p></article><article class="stat-card"><h2>Còn phải thu</h2><p id="unpaid-total">0 đ</p></article></div>
+                    <div class="table-wrap"><table><thead><tr><th>Học sinh</th><th>Lớp</th><th>Học phí</th><th>Trạng thái tháng</th><th>Thao tác</th></tr></thead><tbody id="finance-list"></tbody></table></div>
+                    <div class="empty" id="finance-empty">Thêm học sinh để lập danh sách học phí.</div>
+                </div>
+            </section>
+
+            <section class="view" id="view-settings" hidden>
+                <header class="page-header"><div><h1>Cài đặt hệ thống</h1><p>Tạo tài khoản và cấu hình quyền theo vai trò.</p></div></header>
+                <div class="panel">
+                    <h2>Tạo tài khoản quản trị và nhân sự</h2>
+                    <p class="muted">Chỉ quản trị viên đã đăng nhập mới có thể tạo thêm tài khoản Admin.</p>
+                    <form id="account-form">
+                        <div class="form-grid">
+                            <label class="field">Họ tên<input name="displayName" required maxlength="80"></label>
+                            <label class="field">Tên đăng nhập<input name="username" required maxlength="40" autocomplete="off"></label>
+                            <label class="field">Mật khẩu (ít nhất 8 ký tự)<input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
+                            <label class="field">Vai trò<select name="role"><option value="teacher">Giáo viên</option><option value="assistant">Trợ giảng</option><option value="admin">Quản trị viên (Admin)</option></select></label>
+                        </div>
+                        <p class="muted">Tên tài khoản quản trị phải kết thúc bằng “admin”; giáo viên/giảng viên phải kết thúc bằng “giaovien”.</p>
+                        <button class="btn" type="submit">Tạo tài khoản</button>
+                    </form>
+                    <h3>Tài khoản đăng nhập cổng giáo viên</h3>
+                    <p class="muted">Xuất danh sách tài khoản giáo viên/trợ giảng để nhập vào file cổng nhân sự. Gói chỉ chứa thông tin tài khoản và mã băm mật khẩu, không chứa mật khẩu rõ hay dữ liệu học sinh. Hãy gửi file này qua kênh tin cậy.</p>
+                    <button class="btn green" id="export-staff-accounts" type="button">Xuất gói tài khoản</button>
+                    <h3>Quyền mặc định của từng vai trò</h3>
+                    <p class="muted">Bỏ chọn để thu hồi chức năng tương ứng. Giáo viên mặc định có thể quản lý học sinh, điểm danh và nhập điểm. Trợ giảng mặc định có thể quản lý học sinh và điểm danh.</p>
+                    <form id="permissions-form">
+                        <div class="table-wrap"><table><thead><tr><th>Vai trò</th><th>Thêm học sinh</th><th>Điểm danh</th><th>Điểm số</th><th>Kiểm kê học phí</th></tr></thead><tbody>
+                            <tr><th>Giáo viên</th><td><input type="checkbox" data-role="teacher" data-permission="students"></td><td><input type="checkbox" data-role="teacher" data-permission="attendance"></td><td><input type="checkbox" data-role="teacher" data-permission="grades"></td><td><input type="checkbox" data-role="teacher" data-permission="finance"></td></tr>
+                            <tr><th>Trợ giảng</th><td><input type="checkbox" data-role="assistant" data-permission="students"></td><td><input type="checkbox" data-role="assistant" data-permission="attendance"></td><td><input type="checkbox" data-role="assistant" data-permission="grades"></td><td><input type="checkbox" data-role="assistant" data-permission="finance"></td></tr>
+                        </tbody></table></div>
+                        <button class="btn" type="submit">Lưu phân quyền</button>
+                    </form>
+                </div>
+                <div class="panel"><h2>Tài khoản hệ thống</h2><div class="table-wrap"><table><thead><tr><th>Họ tên</th><th>Tên đăng nhập</th><th>Vai trò</th><th>Thao tác</th></tr></thead><tbody id="account-list"></tbody></table></div><div class="empty" id="account-empty">Chưa có tài khoản.</div></div>
+                <div class="panel"><h2>Lưu ý lưu trữ</h2><p class="muted">Dữ liệu chỉ lưu trong trình duyệt hiện tại. Xóa dữ liệu trình duyệt có thể làm mất hồ sơ; các thiết bị khác không đồng bộ. Muốn dùng thật cần máy chủ, cơ sở dữ liệu và xác thực/phân quyền phía máy chủ. Bản HTML này không phải hệ thống bảo mật.</p></div>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="class-dialog"><form id="class-form">
+        <h2>Tạo lớp học</h2>
+        <label class="field">Tên lớp<input name="name" required maxlength="80"></label>
+        <label class="field">Học phí mỗi học sinh / tháng (đ)<input name="tuition" type="number" min="0" step="1000" required></label>
+        <div class="dialog-actions"><button class="btn gray" type="button" data-close="class-dialog">Hủy</button><button class="btn" type="submit">Lưu lớp</button></div>
+    </form></dialog>
+
+    <dialog id="student-dialog"><form id="student-form">
+        <h2>Thêm học sinh</h2>
+        <label class="field">Họ tên<input name="name" required maxlength="80"></label>
+        <label class="field">Lớp<select name="classId"></select></label>
+        <label class="field">Số điện thoại<input name="phone" type="tel" maxlength="30"></label>
+        <label class="field">Học phí mỗi tháng (đ)<input name="tuition" type="number" min="0" step="1000" value="0" required></label>
+        <div class="dialog-actions"><button class="btn gray" type="button" data-close="student-dialog">Hủy</button><button class="btn" type="submit">Lưu học sinh</button></div>
+    </form></dialog>
+
+    <dialog id="class-students-dialog">
+        <h2 id="class-students-title">Học sinh trong lớp</h2>
+        <ul class="roster-list" id="class-students-list"></ul>
+        <div class="empty" id="class-students-empty">Lớp chưa có học sinh nào.</div>
+        <form id="assign-student-form">
+            <div class="field">
+                <span>Thêm hoặc chuyển học sinh vào lớp</span>
+                <input type="hidden" name="studentId">
+                <span class="selected-student" id="assign-selected-student">Chưa chọn học sinh</span>
+                <button class="btn gray" id="open-assign-student-picker" type="button">Chọn học sinh</button>
+            </div>
+            <p class="muted">Học sinh đang ở lớp khác sẽ được chuyển sang lớp này; hồ sơ và lịch sử học tập được giữ nguyên.</p>
+            <div class="dialog-actions">
+                <button class="btn gray" type="button" data-close="class-students-dialog">Đóng</button>
+                <button class="btn" type="submit">Thêm vào lớp</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="assign-student-picker-dialog">
+        <form id="assign-student-picker-form">
+            <h2>Chọn học sinh vào lớp</h2>
+            <label class="field">Học sinh
+                <select name="studentId" required></select>
+            </label>
+            <div class="dialog-actions">
+                <button class="btn gray" type="button" data-close="assign-student-picker-dialog">Hủy</button>
+                <button class="btn" type="submit">Xác nhận học sinh</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="grade-student-dialog">
+        <form id="grade-student-form">
+            <h2>Chọn học sinh</h2>
+            <label class="field">Học sinh
+                <select name="studentId" required></select>
+            </label>
+            <div class="dialog-actions">
+                <button class="btn gray" type="button" data-close="grade-student-dialog">Hủy</button>
+                <button class="btn" type="submit">Xác nhận học sinh</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        const STORAGE_KEY = 'nttclass-admin-data-v1';
+        const SESSION_KEY = 'nttclass-admin-session-v1';
+        const defaultPermissions = {
+            teacher: { students: true, attendance: true, grades: true, finance: false },
+            assistant: { students: true, attendance: true, grades: false, finance: false }
+        };
+        const emptyData = () => ({
+            classes: [], staff: [], students: [], assessments: [], attendance: [], payments: [], accounts: [],
+            permissions: structuredClone(defaultPermissions)
+        });
+        const byId = id => document.getElementById(id);
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const notice = byId('notice');
+        let data;
+        let currentAccount = null;
+        let firstSetup = false;
+        let activeView = 'classes';
+        let managingClassId = null;
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === null) return emptyData();
+            const stored = JSON.parse(saved);
+            if (!stored || !Array.isArray(stored.classes) || !Array.isArray(stored.staff)) {
+                throw new Error('Dữ liệu lưu không đúng định dạng.');
+            }
+            const base = emptyData();
+            const result = { ...base, ...stored };
+            result.classes = stored.classes.map(item => ({
+                ...item,
+                id: item.id || uid(),
+                legacyStudentCount: Number.isSafeInteger(item.legacyStudentCount) && item.legacyStudentCount >= 0
+                    ? item.legacyStudentCount
+                    : Number.isSafeInteger(item.students) && item.students > 0 ? item.students : 0
+            }));
+            result.students = Array.isArray(stored.students) ? stored.students : [];
+            result.assessments = Array.isArray(stored.assessments) ? stored.assessments : [];
+            result.attendance = Array.isArray(stored.attendance) ? stored.attendance : [];
+            result.payments = Array.isArray(stored.payments) ? stored.payments : [];
+            result.accounts = Array.isArray(stored.accounts) ? stored.accounts : [];
+            result.permissions = {
+                teacher: { ...defaultPermissions.teacher, ...(stored.permissions && stored.permissions.teacher) },
+                assistant: { ...defaultPermissions.assistant, ...(stored.permissions && stored.permissions.assistant) }
+            };
+            return result;
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                notice.textContent = '';
+                return true;
+            } catch (error) {
+                notice.textContent = `Không thể lưu dữ liệu: ${error.message}`;
+                return false;
+            }
+        }
+
+        function uid() {
+            return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        }
+
+        async function hashPassword(password, salt) {
+            if (!crypto.subtle) throw new Error('Trình duyệt không hỗ trợ mã hóa mật khẩu. Hãy mở bằng trình duyệt hiện đại qua HTTPS hoặc localhost.');
+            const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' }, key, 256);
+            return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        function bytesToHex(bytes) {
+            return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToBytes(hex) {
+            return new Uint8Array(hex.match(/.{2}/g).map(byte => parseInt(byte, 16)));
+        }
+
+        async function makeAccount(displayName, username, password, role) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            return { id: uid(), displayName, username, role, salt: bytesToHex(salt), passwordHash: await hashPassword(password, salt) };
+        }
+
+        function usernameRole(username) {
+            const normalized = username.trim().toLocaleLowerCase();
+            if (normalized.endsWith('admin')) return 'admin';
+            if (normalized.endsWith('giaovien')) return 'teacher';
+            return null;
+        }
+
+        function accountRole(account) {
+            const roleFromUsername = usernameRole(account.username);
+            if (roleFromUsername) return roleFromUsername === account.role ? roleFromUsername : null;
+            return account.role === 'assistant' ? 'assistant' : null;
+        }
+
+        function usernameRoleError(username, role) {
+            const roleFromUsername = usernameRole(username);
+            if (role === 'admin' && roleFromUsername !== 'admin') {
+                return 'Tên đăng nhập của quản trị viên phải kết thúc bằng “admin”.';
+            }
+            if (role === 'teacher' && roleFromUsername !== 'teacher') {
+                return 'Tên đăng nhập của giáo viên/giảng viên phải kết thúc bằng “giaovien”.';
+            }
+            if (role === 'assistant' && roleFromUsername) {
+                return 'Tên đăng nhập trợ giảng không được kết thúc bằng “admin” hoặc “giaovien”.';
+            }
+            return '';
+        }
+
+        function showLogin() {
+            firstSetup = data.accounts.length === 0;
+            byId('login-page').hidden = false;
+            byId('app').hidden = true;
+            byId('display-name-field').hidden = !firstSetup;
+            byId('login-description').textContent = firstSetup
+                ? 'Thiết lập tài khoản quản trị viên đầu tiên để bắt đầu sử dụng.'
+                : 'Đăng nhập bằng tài khoản đã được quản trị viên tạo.';
+            byId('login-submit').textContent = firstSetup ? 'Tạo quản trị viên' : 'Đăng nhập';
+            byId('login-notice').textContent = '';
+        }
+
+        function roleName(role) {
+            return role === 'admin' ? 'Quản trị viên' : role === 'teacher' ? 'Giáo viên' : 'Trợ giảng';
+        }
+
+        function normalizeStaffRole(role) {
+            const normalized = String(role).trim().toLocaleLowerCase();
+            if (normalized.includes('trợ giảng') || normalized === 'assistant') return 'assistant';
+            if (normalized.includes('giáo viên') || normalized.includes('giảng viên') || normalized === 'teacher') return 'teacher';
+            return null;
+        }
+
+        function hasPermission(permission) {
+            if (!currentAccount) return false;
+            if (currentAccount.role === 'admin') return true;
+            return Boolean(data.permissions[currentAccount.role] && data.permissions[currentAccount.role][permission]);
+        }
+
+        function showApp(account) {
+            currentAccount = account;
+            byId('login-page').hidden = true;
+            byId('app').hidden = false;
+            byId('current-user').textContent = account.displayName;
+            byId('current-role').textContent = roleName(account.role);
+            byId('avatar').textContent = account.displayName.trim().slice(0, 2).toUpperCase();
+            renderAll();
+            navigate(account.role === 'admin' ? 'classes' : 'students');
+        }
+
+        function navigate(view) {
+            const permissions = {
+                classes: currentAccount && currentAccount.role === 'admin',
+                staff: currentAccount && currentAccount.role === 'admin',
+                students: hasPermission('students'),
+                attendance: hasPermission('attendance'),
+                grades: hasPermission('grades'),
+                finance: hasPermission('finance'),
+                settings: currentAccount && currentAccount.role === 'admin'
+            };
+            if (!permissions[view]) {
+                notice.textContent = 'Tài khoản của bạn chưa được cấp quyền cho chức năng này.';
+                return;
+            }
+            activeView = view;
+            document.querySelectorAll('.view').forEach(section => { section.hidden = section.id !== `view-${view}`; });
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.hidden = !permissions[button.dataset.view];
+                button.classList.toggle('active', button.dataset.view === view);
+            });
+            byId('notice').textContent = '';
+            if (view === 'attendance') renderAttendance();
+            if (view === 'grades') renderGrades();
+            if (view === 'finance') renderFinance();
+            if (view === 'staff') renderStaffDirectory();
+            if (view === 'settings') renderSettings();
+        }
+
+        function addCell(row, text) {
+            const cell = document.createElement('td');
+            cell.textContent = text;
+            row.appendChild(cell);
+            return cell;
+        }
+
+        function getStudent(id) {
+            return data.students.find(student => student.id === id);
+        }
+
+        function getClassName(id) {
+            const item = data.classes.find(entry => entry.id === id);
+            return item ? item.name : 'Chưa xếp lớp';
+        }
+
+        function renderAll() {
+            const activeClasses = data.classes.filter(item => item.active !== false);
+            byId('class-count').textContent = activeClasses.length.toLocaleString('vi-VN');
+            const legacyCount = activeClasses.reduce((sum, item) => sum + (item.legacyStudentCount || 0), 0);
+            byId('student-count').textContent = (data.students.length + legacyCount).toLocaleString('vi-VN');
+            byId('staff-count').textContent = (data.staff.length + data.accounts.filter(item => item.role !== 'admin').length).toLocaleString('vi-VN');
+            const legacyRevenue = activeClasses.reduce((sum, item) => sum + (item.legacyStudentCount || 0) * item.tuition, 0);
+            byId('revenue').textContent = (data.students.reduce((sum, student) => sum + student.tuition, 0) + legacyRevenue).toLocaleString('vi-VN') + ' đ';
+
+            const classList = byId('class-list');
+            classList.replaceChildren();
+            data.classes.forEach((item, index) => {
+                const row = document.createElement('tr');
+                addCell(row, item.name);
+                const classStudents = data.students.filter(student => student.classId === item.id).length;
+                addCell(row, (classStudents + (item.legacyStudentCount || 0)).toLocaleString('vi-VN')
+                    + (item.legacyStudentCount ? ` (${item.legacyStudentCount} hồ sơ cũ chưa chi tiết)` : ''));
+                addCell(row, item.tuition.toLocaleString('vi-VN') + ' đ');
+                const action = addCell(row, '');
+                if (item.legacyStudentCount) {
+                    const reconcile = document.createElement('button');
+                    reconcile.className = 'btn gray';
+                    reconcile.textContent = 'Đã nhập đủ hồ sơ cũ';
+                    reconcile.addEventListener('click', () => {
+                        if (!confirm(`Xác nhận đã nhập đủ hồ sơ cá nhân thay cho ${item.legacyStudentCount} học sinh cũ của lớp "${item.name}"?`)) return;
+                        const previous = item.legacyStudentCount;
+                        item.legacyStudentCount = 0;
+                        if (!saveData()) item.legacyStudentCount = previous;
+                        renderAll();
+                    });
+                    action.appendChild(reconcile);
+                }
+                const manageStudents = document.createElement('button');
+                manageStudents.className = 'btn gray';
+                manageStudents.textContent = 'Quản lý học sinh';
+                manageStudents.addEventListener('click', () => openClassStudents(item.id));
+                action.appendChild(manageStudents);
+                const button = document.createElement('button');
+                button.className = 'btn red-text';
+                button.textContent = 'Xóa';
+                button.addEventListener('click', () => {
+                    if (data.students.some(student => student.classId === item.id)) {
+                        notice.textContent = 'Không thể xóa lớp đang có học sinh. Hãy chuyển học sinh sang lớp khác trước.';
+                        return;
+                    }
+                    if (confirm(`Bạn có chắc muốn xóa lớp "${item.name}"?`)) {
+                        const removed = data.classes.splice(index, 1);
+                        if (!saveData()) data.classes.splice(index, 0, ...removed);
+                        renderAll();
+                    }
+                });
+                action.appendChild(button);
+                classList.appendChild(row);
+            });
+            byId('class-empty').hidden = data.classes.length > 0;
+
+            const studentList = byId('student-list');
+            studentList.replaceChildren();
+            data.students.forEach((student, index) => {
+                const row = document.createElement('tr');
+                addCell(row, student.name);
+                addCell(row, getClassName(student.classId));
+                addCell(row, student.phone || '—');
+                const action = addCell(row, '');
+                if (currentAccount.role === 'admin') {
+                    const button = document.createElement('button');
+                    button.className = 'btn red-text';
+                    button.textContent = 'Xóa';
+                    button.setAttribute('aria-label', `Xóa học sinh ${student.name}`);
+                    button.addEventListener('click', () => {
+                        if (!confirm(`Xóa hồ sơ học sinh "${student.name}" cùng dữ liệu điểm danh, điểm số và học phí?`)) return;
+                        const removed = data.students.splice(index, 1)[0];
+                        const related = {
+                            assessments: data.assessments.filter(item => item.studentId === student.id),
+                            attendance: data.attendance.filter(item => item.studentId === student.id),
+                            payments: data.payments.filter(item => item.studentId === student.id)
+                        };
+                        data.assessments = data.assessments.filter(item => item.studentId !== student.id);
+                        data.attendance = data.attendance.filter(item => item.studentId !== student.id);
+                        data.payments = data.payments.filter(item => item.studentId !== student.id);
+                        if (!saveData()) {
+                            data.students.splice(index, 0, removed);
+                            data.assessments.push(...related.assessments);
+                            data.attendance.push(...related.attendance);
+                            data.payments.push(...related.payments);
+                        }
+                        renderAll();
+                        if (activeView === 'finance') renderFinance();
+                    });
+                    action.appendChild(button);
+                }
+                studentList.appendChild(row);
+            });
+            byId('student-empty').hidden = data.students.length > 0;
+            if (activeView === 'staff') renderStaffDirectory();
+            renderStudentOptions();
+            renderAttendance();
+            renderGrades();
+            renderFinance();
+        }
+
+        function renderStudentOptions() {
+            const select = document.querySelector('#grade-student-form [name="studentId"]');
+            const selected = byId('grade-form').elements.studentId.value;
+            select.replaceChildren();
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Chọn học sinh';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            select.appendChild(placeholder);
+            data.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} — ${getClassName(student.classId)}`;
+                select.appendChild(option);
+            });
+            if (selected && data.students.some(student => student.id === selected)) select.value = selected;
+            else byId('grade-form').elements.studentId.value = '';
+            byId('grade-selected-student').textContent = selected && data.students.some(student => student.id === selected)
+                ? `${data.students.find(student => student.id === selected).name} — ${getClassName(data.students.find(student => student.id === selected).classId)}`
+                : 'Chưa chọn học sinh';
+            select.disabled = data.students.length === 0;
+            byId('open-grade-student-picker').disabled = data.students.length === 0;
+            byId('grade-form').querySelector('button[type="submit"]').disabled =
+                data.students.length === 0 || !byId('grade-form').elements.studentId.value;
+        }
+
+        function openClassStudents(classId) {
+            managingClassId = classId;
+            renderClassStudents();
+            byId('class-students-dialog').showModal();
+        }
+
+        function renderClassStudents() {
+            const classItem = data.classes.find(item => item.id === managingClassId);
+            if (!classItem) {
+                byId('class-students-dialog').close();
+                return;
+            }
+            byId('class-students-title').textContent = `Học sinh — ${classItem.name}`;
+            const roster = data.students.filter(student => student.classId === classItem.id);
+            const rosterList = byId('class-students-list');
+            rosterList.replaceChildren();
+            roster.forEach(student => {
+                const row = document.createElement('li');
+                const name = document.createElement('span');
+                name.textContent = student.name;
+                const removeButton = document.createElement('button');
+                removeButton.className = 'btn red-text';
+                removeButton.type = 'button';
+                removeButton.textContent = 'Gỡ khỏi lớp';
+                removeButton.setAttribute('aria-label', `Gỡ ${student.name} khỏi lớp ${classItem.name}`);
+                removeButton.addEventListener('click', () => {
+                    if (!confirm(`Gỡ học sinh "${student.name}" khỏi lớp "${classItem.name}"? Hồ sơ và lịch sử sẽ được giữ nguyên.`)) return;
+                    const previousClassId = student.classId;
+                    student.classId = '';
+                    if (saveData()) {
+                        renderAll();
+                        renderClassStudents();
+                    } else student.classId = previousClassId;
+                });
+                row.append(name, removeButton);
+                rosterList.appendChild(row);
+            });
+            byId('class-students-empty').hidden = roster.length > 0;
+
+            const select = document.querySelector('#assign-student-picker-form [name="studentId"]');
+            select.replaceChildren();
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Chọn học sinh';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            select.appendChild(placeholder);
+            data.students.filter(student => student.classId !== classItem.id).forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                const currentClass = data.classes.find(item => item.id === student.classId);
+                option.textContent = currentClass ? `${student.name} — hiện ở lớp ${currentClass.name}` : `${student.name} — chưa xếp lớp`;
+                select.appendChild(option);
+            });
+            select.disabled = select.options.length === 1;
+            const selectedStudentId = byId('assign-student-form').elements.studentId.value;
+            const selectedStudent = getStudent(selectedStudentId);
+            if (!selectedStudent || selectedStudent.classId === classItem.id) {
+                byId('assign-student-form').elements.studentId.value = '';
+                byId('assign-selected-student').textContent = 'Chưa chọn học sinh';
+            } else {
+                byId('assign-selected-student').textContent = `${selectedStudent.name} — ${getClassName(selectedStudent.classId)}`;
+            }
+            byId('open-assign-student-picker').disabled = select.disabled;
+            byId('assign-student-form').querySelector('button[type="submit"]').disabled =
+                select.disabled || !byId('assign-student-form').elements.studentId.value;
+        }
+
+        function renderAttendance() {
+            const dateInput = byId('attendance-date');
+            if (!dateInput.value) dateInput.value = today;
+            const selectedDate = dateInput.value;
+            const classSelect = byId('attendance-class');
+            const selectedClass = classSelect.value || 'all';
+            classSelect.replaceChildren();
+            const allClasses = document.createElement('option');
+            allClasses.value = 'all';
+            allClasses.textContent = 'Tất cả lớp';
+            classSelect.appendChild(allClasses);
+            const classOptions = data.classes.map(item => ({ value: item.id, label: item.name }));
+            if (data.students.some(student => !student.classId || !data.classes.some(item => item.id === student.classId))) {
+                classOptions.push({ value: 'unassigned', label: 'Chưa xếp lớp' });
+            }
+            classOptions.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.value;
+                option.textContent = item.label;
+                classSelect.appendChild(option);
+            });
+            classSelect.value = classOptions.some(item => item.value === selectedClass) ? selectedClass : 'all';
+            const selectedStudents = data.students.filter(student => {
+                if (classSelect.value === 'all') return true;
+                if (classSelect.value === 'unassigned') return !student.classId || !data.classes.some(item => item.id === student.classId);
+                return student.classId === classSelect.value;
+            });
+            const list = byId('attendance-list');
+            list.replaceChildren();
+            selectedStudents.forEach(student => {
+                const label = document.createElement('label');
+                label.className = 'check-row';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.studentId = student.id;
+                checkbox.checked = data.attendance.some(item => item.date === selectedDate && item.studentId === student.id && item.present);
+                label.append(checkbox, document.createTextNode(`${student.name} — ${getClassName(student.classId)}`));
+                list.appendChild(label);
+            });
+            byId('attendance-empty').textContent = data.students.length === 0
+                ? 'Thêm học sinh trước khi điểm danh.'
+                : 'Lớp này chưa có học sinh.';
+            byId('attendance-empty').hidden = selectedStudents.length > 0;
+            byId('save-attendance').disabled = selectedStudents.length === 0;
+            const history = byId('attendance-history');
+            history.replaceChildren();
+            [...data.attendance].sort((a, b) => b.date.localeCompare(a.date)).forEach(item => {
+                const student = getStudent(item.studentId);
+                if (!student) return;
+                const row = document.createElement('tr');
+                addCell(row, item.date);
+                addCell(row, student.name);
+                addCell(row, item.present ? 'Có mặt' : 'Vắng mặt');
+                history.appendChild(row);
+            });
+            byId('attendance-history-empty').hidden = history.children.length > 0;
+        }
+
+        function renderGrades() {
+            const list = byId('grade-list');
+            list.replaceChildren();
+            [...data.assessments].sort((a, b) => b.date.localeCompare(a.date)).forEach(item => {
+                const student = getStudent(item.studentId);
+                if (!student) return;
+                const row = document.createElement('tr');
+                addCell(row, item.date);
+                addCell(row, student.name);
+                addCell(row, `${item.subject} — ${item.title}`);
+                addCell(row, `${item.score} / ${item.maxScore}`);
+                addCell(row, item.comment || '—');
+                list.appendChild(row);
+            });
+            byId('grade-empty').hidden = list.children.length > 0;
+            byId('grade-form').querySelector('button[type="submit"]').disabled =
+                data.students.length === 0 || !byId('grade-form').elements.studentId.value;
+        }
+
+        function renderFinance() {
+            const monthInput = byId('finance-month');
+            if (!monthInput.value) monthInput.value = today.slice(0, 7);
+            const month = monthInput.value;
+            const list = byId('finance-list');
+            list.replaceChildren();
+            let paidTotal = 0;
+            let unpaidTotal = 0;
+            data.students.forEach(student => {
+                const payment = data.payments.find(item => item.studentId === student.id && item.month === month);
+                if (payment && payment.paid) paidTotal += student.tuition;
+                else unpaidTotal += student.tuition;
+                const row = document.createElement('tr');
+                addCell(row, student.name);
+                addCell(row, getClassName(student.classId));
+                addCell(row, student.tuition.toLocaleString('vi-VN') + ' đ');
+                const statusCell = addCell(row, '');
+                const status = document.createElement('span');
+                status.className = `pill${payment && payment.paid ? '' : ' unpaid'}`;
+                status.textContent = payment && payment.paid ? 'Đã đóng' : 'Chưa đóng';
+                statusCell.appendChild(status);
+                const action = addCell(row, '');
+                const button = document.createElement('button');
+                button.className = `btn ${payment && payment.paid ? 'gray' : 'green'}`;
+                button.textContent = payment && payment.paid ? 'Đánh dấu chưa đóng' : 'Đánh dấu đã đóng';
+                button.addEventListener('click', () => {
+                    const existing = data.payments.find(item => item.studentId === student.id && item.month === month);
+                    if (existing) {
+                        const previous = existing.paid;
+                        existing.paid = !existing.paid;
+                        if (saveData()) renderFinance();
+                        else existing.paid = previous;
+                    } else {
+                        const entry = { studentId: student.id, month, paid: true, updatedAt: new Date().toISOString() };
+                        data.payments.push(entry);
+                        if (saveData()) renderFinance();
+                        else data.payments.pop();
+                    }
+                });
+                action.appendChild(button);
+                list.appendChild(row);
+            });
+            byId('finance-empty').hidden = data.students.length > 0;
+            byId('paid-total').textContent = paidTotal.toLocaleString('vi-VN') + ' đ';
+            byId('unpaid-total').textContent = unpaidTotal.toLocaleString('vi-VN') + ' đ';
+        }
+
+        function renderSettings() {
+            document.querySelectorAll('#permissions-form input[type="checkbox"]').forEach(input => {
+                input.checked = Boolean(data.permissions[input.dataset.role][input.dataset.permission]);
+            });
+            const list = byId('account-list');
+            list.replaceChildren();
+            data.accounts.forEach(account => {
+                const row = document.createElement('tr');
+                addCell(row, account.displayName);
+                addCell(row, account.username);
+                addCell(row, roleName(account.role));
+                const action = addCell(row, '');
+                const button = document.createElement('button');
+                button.className = 'btn red-text';
+                button.textContent = 'Xóa tài khoản';
+                const adminCount = data.accounts.filter(item => item.role === 'admin').length;
+                button.disabled = account.id === currentAccount.id || (account.role === 'admin' && adminCount <= 1);
+                button.title = account.id === currentAccount.id
+                    ? 'Không thể xóa tài khoản đang đăng nhập.'
+                    : account.role === 'admin' && adminCount <= 1
+                        ? 'Phải luôn có ít nhất một tài khoản Admin.'
+                        : '';
+                button.addEventListener('click', () => deleteStaffAccount(account));
+                action.appendChild(button);
+                list.appendChild(row);
+            });
+            byId('account-empty').hidden = data.accounts.length > 0;
+        }
+
+        function deleteStaffAccount(account) {
+            if (account.id === currentAccount.id) {
+                notice.textContent = 'Không thể xóa tài khoản đang đăng nhập.';
+                return;
+            }
+            if (account.role === 'admin' && data.accounts.filter(item => item.role === 'admin').length <= 1) {
+                notice.textContent = 'Phải luôn có ít nhất một tài khoản Admin.';
+                return;
+            }
+            if (!confirm(`Xóa tài khoản "${account.username}" của ${account.displayName}?`)) return;
+            const index = data.accounts.findIndex(item => item.id === account.id);
+            if (index < 0) return;
+            const removed = data.accounts.splice(index, 1)[0];
+            if (!saveData()) {
+                data.accounts.splice(index, 0, removed);
+                return;
+            }
+            renderAll();
+            if (activeView === 'staff') renderStaffDirectory();
+            if (activeView === 'settings') renderSettings();
+        }
+
+        function renderStaffDirectory() {
+            const accounts = data.accounts.filter(account => account.role === 'teacher' || account.role === 'assistant');
+            const legacyStaff = data.staff
+                .map(person => ({ person, role: normalizeStaffRole(person.role) }))
+                .filter(({ role }) => role)
+                .filter(({ person, role }) => !accounts.some(account =>
+                    account.displayName.trim().toLocaleLowerCase() === String(person.name).trim().toLocaleLowerCase()
+                    && account.role === role))
+                .map(({ person, role }, index) => ({
+                    id: `legacy-${index}`,
+                    displayName: person.name,
+                    username: '',
+                    role,
+                    linked: false
+                }));
+            const linkedStaff = accounts.map(account => ({
+                id: account.id,
+                displayName: account.displayName,
+                username: account.username,
+                role: account.role,
+                account
+            }));
+            const staff = [...linkedStaff, ...legacyStaff];
+            const teachers = staff.filter(person => person.role === 'teacher').length;
+            const assistants = staff.filter(person => person.role === 'assistant').length;
+            byId('teacher-count').textContent = teachers.toLocaleString('vi-VN');
+            byId('assistant-count').textContent = assistants.toLocaleString('vi-VN');
+
+            const filter = byId('staff-filter').value;
+            const filteredStaff = staff.filter(person => {
+                if (filter === 'all') return true;
+                if (filter === 'unlinked') return !person.account;
+                return person.role === filter;
+            });
+            const list = byId('staff-directory');
+            list.replaceChildren();
+            filteredStaff.forEach(person => {
+                const row = document.createElement('tr');
+                addCell(row, person.displayName);
+                addCell(row, person.username || '—');
+                addCell(row, person.account ? roleName(person.role) : person.role);
+                addCell(row, person.account ? 'Có tài khoản' : 'Chưa có tài khoản');
+                const action = addCell(row, '');
+                if (person.account) {
+                    const button = document.createElement('button');
+                    button.className = 'btn red-text';
+                    button.textContent = 'Xóa tài khoản';
+                    button.addEventListener('click', () => deleteStaffAccount(person.account));
+                    action.appendChild(button);
+                } else {
+                    action.textContent = 'Tạo tài khoản trong Cài đặt';
+                }
+                list.appendChild(row);
+            });
+            byId('staff-directory-empty').hidden = filteredStaff.length > 0;
+        }
+
+        byId('login-form').addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const username = form.elements.username.value.trim().toLowerCase();
+            const password = form.elements.password.value;
+            const loginNotice = byId('login-notice');
+            byId('login-submit').disabled = true;
+            try {
+                if (!username) throw new Error('Vui lòng nhập tên đăng nhập.');
+                if (firstSetup) {
+                    const roleError = usernameRoleError(username, 'admin');
+                    if (roleError) throw new Error(roleError);
+                    const displayName = form.elements.displayName.value.trim();
+                    if (!displayName) throw new Error('Vui lòng nhập họ tên quản trị viên.');
+                    if (password.length < 8) throw new Error('Mật khẩu cần có ít nhất 8 ký tự.');
+                    const account = await makeAccount(displayName, username, password, 'admin');
+                    data.accounts.push(account);
+                    if (!saveData()) {
+                        data.accounts.pop();
+                        throw new Error('Không lưu được tài khoản quản trị viên.');
+                    }
+                    sessionStorage.setItem(SESSION_KEY, account.id);
+                    showApp(account);
+                } else {
+                    const account = data.accounts.find(item => item.username.toLowerCase() === username);
+                    if (!account) throw new Error('Tên đăng nhập hoặc mật khẩu không chính xác.');
+                    const actualHash = await hashPassword(password, hexToBytes(account.salt));
+                    if (actualHash !== account.passwordHash) throw new Error('Tên đăng nhập hoặc mật khẩu không chính xác.');
+                    const role = accountRole(account);
+                    if (!role) throw new Error('Tên đăng nhập không khớp với vai trò tài khoản.');
+                    sessionStorage.setItem(SESSION_KEY, account.id);
+                    showApp({ ...account, role });
+                }
+                form.reset();
+            } catch (error) {
+                loginNotice.textContent = error.message;
+            } finally {
+                byId('login-submit').disabled = false;
+            }
+        });
+
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', () => navigate(button.dataset.view));
+        });
+        byId('logout-button').addEventListener('click', () => {
+            sessionStorage.removeItem(SESSION_KEY);
+            currentAccount = null;
+            showLogin();
+        });
+
+        byId('open-class-form').addEventListener('click', () => byId('class-dialog').showModal());
+        byId('open-student-form').addEventListener('click', () => {
+            const select = document.querySelector('#student-form [name="classId"]');
+            select.replaceChildren();
+            const none = document.createElement('option');
+            none.value = '';
+            none.textContent = 'Chưa xếp lớp';
+            select.appendChild(none);
+            data.classes.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name;
+                select.appendChild(option);
+            });
+            byId('student-dialog').showModal();
+        });
+        byId('open-grade-student-picker').addEventListener('click', () => {
+            const select = document.querySelector('#grade-student-form [name="studentId"]');
+            const currentStudent = byId('grade-form').elements.studentId.value;
+            if (currentStudent) select.value = currentStudent;
+            byId('grade-student-dialog').showModal();
+        });
+        byId('open-assign-student-picker').addEventListener('click', () => {
+            const select = document.querySelector('#assign-student-picker-form [name="studentId"]');
+            const currentStudent = byId('assign-student-form').elements.studentId.value;
+            if (currentStudent) select.value = currentStudent;
+            byId('assign-student-picker-dialog').showModal();
+        });
+        byId('assign-student-picker-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const student = getStudent(event.currentTarget.elements.studentId.value);
+            const classItem = data.classes.find(item => item.id === managingClassId);
+            if (!student || !classItem || student.classId === classItem.id) {
+                notice.textContent = 'Vui lòng chọn học sinh chưa thuộc lớp này.';
+                return;
+            }
+            byId('assign-student-form').elements.studentId.value = student.id;
+            const currentClass = data.classes.find(item => item.id === student.classId);
+            byId('assign-selected-student').textContent =
+                `${student.name} — ${currentClass ? `hiện ở lớp ${currentClass.name}` : 'chưa xếp lớp'}`;
+            byId('assign-student-form').querySelector('button[type="submit"]').disabled = false;
+            byId('assign-student-picker-dialog').close();
+        });
+        byId('grade-student-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const studentId = event.currentTarget.elements.studentId.value;
+            const student = getStudent(studentId);
+            if (!student) {
+                notice.textContent = 'Vui lòng chọn một học sinh hợp lệ.';
+                return;
+            }
+            byId('grade-form').elements.studentId.value = student.id;
+            byId('grade-selected-student').textContent = `${student.name} — ${getClassName(student.classId)}`;
+            byId('grade-form').querySelector('button[type="submit"]').disabled = false;
+            byId('grade-student-dialog').close();
+        });
+        byId('add-staff-account').addEventListener('click', () => {
+            navigate('settings');
+            byId('account-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            byId('account-form').elements.displayName.focus({ preventScroll: true });
+        });
+        byId('staff-filter').addEventListener('change', renderStaffDirectory);
+        document.querySelectorAll('[data-close]').forEach(button => {
+            button.addEventListener('click', () => byId(button.dataset.close).close());
+        });
+
+        byId('class-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const item = { id: uid(), name: form.elements.name.value.trim(), tuition: Number(form.elements.tuition.value), active: true };
+            if (!item.name || !Number.isSafeInteger(item.tuition) || item.tuition < 0) {
+                notice.textContent = 'Vui lòng nhập tên lớp và học phí hợp lệ.';
+                return;
+            }
+            data.classes.push(item);
+            if (saveData()) {
+                form.reset();
+                byId('class-dialog').close();
+                renderAll();
+            } else data.classes.pop();
+        });
+
+        byId('student-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const classId = form.elements.classId.value;
+            const tuition = Number(form.elements.tuition.value);
+            const item = {
+                id: uid(), name: form.elements.name.value.trim(), classId,
+                phone: form.elements.phone.value.trim(),
+                tuition: tuition === 0 && classId ? (data.classes.find(entry => entry.id === classId)?.tuition || 0) : tuition
+            };
+            if (!item.name || !Number.isSafeInteger(item.tuition) || item.tuition < 0) {
+                notice.textContent = 'Vui lòng nhập họ tên và học phí hợp lệ.';
+                return;
+            }
+            data.students.push(item);
+            if (saveData()) {
+                form.reset();
+                byId('student-dialog').close();
+                renderAll();
+            } else data.students.pop();
+        });
+
+        byId('assign-student-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const student = getStudent(event.currentTarget.elements.studentId.value);
+            const classItem = data.classes.find(item => item.id === managingClassId);
+            if (!student || !classItem) {
+                notice.textContent = 'Không tìm thấy học sinh hoặc lớp học cần cập nhật.';
+                return;
+            }
+            const previousClassId = student.classId;
+            if (previousClassId) {
+                const previousClass = data.classes.find(item => item.id === previousClassId);
+                const previousName = previousClass ? previousClass.name : 'lớp khác';
+                if (!confirm(`"${student.name}" hiện thuộc ${previousName}. Chuyển học sinh sang lớp "${classItem.name}"?`)) return;
+            }
+            student.classId = classItem.id;
+            if (saveData()) {
+                renderAll();
+                renderClassStudents();
+            } else student.classId = previousClassId;
+        });
+
+        byId('attendance-date').value = today;
+        byId('attendance-date').addEventListener('change', renderAttendance);
+        byId('attendance-class').addEventListener('change', renderAttendance);
+        byId('save-attendance').addEventListener('click', () => {
+            const date = byId('attendance-date').value;
+            if (!date) {
+                notice.textContent = 'Vui lòng chọn ngày điểm danh.';
+                return;
+            }
+            const inputs = [...byId('attendance-list').querySelectorAll('input[data-student-id]')];
+            const visibleStudentIds = new Set(inputs.map(input => input.dataset.studentId));
+            const records = inputs.map(input => ({
+                date, studentId: input.dataset.studentId, present: input.checked
+            }));
+            const oldRecords = data.attendance.filter(item => item.date === date && visibleStudentIds.has(item.studentId));
+            data.attendance = data.attendance.filter(item => item.date !== date || !visibleStudentIds.has(item.studentId));
+            data.attendance.push(...records);
+            if (saveData()) renderAttendance();
+            else {
+                data.attendance = data.attendance.filter(item => item.date !== date || !visibleStudentIds.has(item.studentId));
+                data.attendance.push(...oldRecords);
+            }
+        });
+
+        byId('grade-form').elements.date.value = today;
+        byId('grade-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const score = Number(form.elements.score.value);
+            const maxScore = Number(form.elements.maxScore.value);
+            const item = {
+                id: uid(), studentId: form.elements.studentId.value, subject: form.elements.subject.value.trim(),
+                title: form.elements.title.value.trim(), score, maxScore, date: form.elements.date.value,
+                comment: form.elements.comment.value.trim()
+            };
+            if (!item.studentId || !item.subject || !item.title || !item.date || !Number.isFinite(score)
+                || !Number.isFinite(maxScore) || maxScore <= 0 || score < 0 || score > maxScore) {
+                notice.textContent = 'Vui lòng kiểm tra thông tin và đảm bảo điểm nằm trong khoảng 0 đến điểm tối đa.';
+                return;
+            }
+            data.assessments.push(item);
+            if (saveData()) {
+                const keepDate = form.elements.date.value;
+                form.reset();
+                form.elements.date.value = keepDate;
+                form.elements.maxScore.value = '10';
+                renderGrades();
+            } else data.assessments.pop();
+        });
+        byId('finance-month').value = today.slice(0, 7);
+        byId('finance-month').addEventListener('change', renderFinance);
+
+        byId('account-form').addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const displayName = form.elements.displayName.value.trim();
+            const username = form.elements.username.value.trim();
+            const password = form.elements.password.value;
+            const role = form.elements.role.value;
+            if (!['admin', 'teacher', 'assistant'].includes(role)) {
+                notice.textContent = 'Vai trò tài khoản không hợp lệ.';
+                return;
+            }
+            if (!username || !displayName) {
+                notice.textContent = 'Vui lòng nhập họ tên và tên đăng nhập hợp lệ.';
+                return;
+            }
+            const roleError = usernameRoleError(username, role);
+            if (roleError) {
+                notice.textContent = roleError;
+                return;
+            }
+            if (password.length < 8) {
+                notice.textContent = 'Mật khẩu cần có ít nhất 8 ký tự.';
+                return;
+            }
+            if (data.accounts.some(account => account.username.toLowerCase() === username.toLowerCase())) {
+                notice.textContent = 'Tên đăng nhập này đã được sử dụng.';
+                return;
+            }
+            const submit = form.querySelector('button[type="submit"]');
+            submit.disabled = true;
+            try {
+                const account = await makeAccount(displayName, username, password, role);
+                data.accounts.push(account);
+                if (saveData()) {
+                    form.reset();
+                    renderSettings();
+                } else data.accounts.pop();
+            } catch (error) {
+                notice.textContent = error.message;
+            } finally {
+                submit.disabled = false;
+            }
+        });
+
+        byId('export-staff-accounts').addEventListener('click', () => {
+            const accounts = data.accounts
+                .filter(account => account.role === 'teacher' || account.role === 'assistant')
+                .map(({ id, displayName, username, role, salt, passwordHash }) => ({
+                    id, displayName, username, role, salt, passwordHash
+                }));
+            if (accounts.length === 0) {
+                notice.textContent = 'Chưa có tài khoản giáo viên hoặc trợ giảng để xuất.';
+                return;
+            }
+            const packageData = {
+                app: 'NTTCLASS-STAFF-PORTAL',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                accounts
+            };
+            const blob = new Blob([JSON.stringify(packageData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'NTTCLASS-tai-khoan-nhan-su.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            notice.textContent = `Đã xuất ${accounts.length} tài khoản giáo viên/trợ giảng. Gửi file JSON cho nhân sự qua kênh tin cậy.`;
+        });
+
+        byId('permissions-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const previous = structuredClone(data.permissions);
+            document.querySelectorAll('#permissions-form input[type="checkbox"]').forEach(input => {
+                data.permissions[input.dataset.role][input.dataset.permission] = input.checked;
+            });
+            if (!saveData()) data.permissions = previous;
+            else notice.textContent = 'Đã lưu cấu hình phân quyền.';
+        });
+
+        try {
+            data = loadData();
+            const sessionId = sessionStorage.getItem(SESSION_KEY);
+            const sessionAccount = data.accounts.find(account => account.id === sessionId);
+            const role = sessionAccount && accountRole(sessionAccount);
+            if (sessionAccount && role) showApp({ ...sessionAccount, role });
+            else showLogin();
+        } catch (error) {
+            byId('login-page').hidden = false;
+            byId('login-description').textContent = 'Không thể đọc dữ liệu hệ thống.';
+            byId('login-notice').textContent = `${error.message} Hãy kiểm tra dữ liệu lưu trong trình duyệt.`;
+            byId('login-form').hidden = true;
+        }
+    </script>
+</body>
+</html>
